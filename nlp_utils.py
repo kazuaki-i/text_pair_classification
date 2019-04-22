@@ -101,12 +101,12 @@ def convert_seq2(batch, device=None, with_label=True):
             return batch_dev
 
     if with_label:
-        return {'xs1': to_device_batch([x1 for x1, x2, _ in batch]),
+        return {'xs1': to_device_batch([x1 for x1, _, _ in batch]),
                 'xs2': to_device_batch([x2 for _, x2, _ in batch]),
-                # 'xs': to_device_batch([x2 for _, x2, _ in batch]),
                 'ys': to_device_batch([y for _, _, y in batch])}
     else:
-        return to_device_batch([x for x in batch])
+        return {'xs1': to_device_batch([x1 for x1, _, _ in batch]),
+                'xs2': to_device_batch([x2 for _, x2, _ in batch])}
 
 
 def make_vocab2(dataset, max_vocab_size, min_freq=2):
