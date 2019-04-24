@@ -73,7 +73,8 @@ def convert_seq2(batch, device=None, with_label=True):
                 'xs2': to_device_batch([x2 for _, x2, _ in batch]),
                 'ys': to_device_batch([y for _, _, y in batch])}
     else:
-        return to_device_batch([x for x in batch])
+        return {'xs1': to_device_batch([x1 for x1, _, _ in batch]),
+                'xs2': to_device_batch([x2 for _, x2, _ in batch])}
 
 
 def make_vocab2(dataset, max_vocab_size, min_freq=2):
@@ -107,7 +108,7 @@ def load_input_file(fi_name):
             l_lst = line.strip().split('\t')
             if len(l_lst) < 3:
                 continue
-            i1, i2 = l_lst[0].split(' '), l_lst[1].split(' ')
+            i1, i2 = split_text(l_lst[0]), split_text(l_lst[1])
             label = l_lst[2]
 
             rl.append((i1, i2, label,))
