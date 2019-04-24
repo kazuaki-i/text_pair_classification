@@ -42,20 +42,14 @@ def main():
     parser.add_argument('--same-network', action='store_true', help='use same network between i1 and i2')
     parser.add_argument('--save-init', action='store_true', help='save init model')
     parser.add_argument('--char-based', action='store_true')
-    parser.add_argument('--test', dest='test', action='store_true')
-    parser.set_defaults(test=False)
 
     args = parser.parse_args()
     print(json.dumps(args.__dict__, indent=2))
 
     train, test, vocab = get_input_dataset(args.dataset, vocab=None, max_vocab_size=args.vocab)
 
-    if args.test:
-        train = train[:100]
-        test = test[:100]
-
     print('# train data: {}'.format(len(train)))
-    print('# test  data: {}'.format(len(test)))
+    print('# dev  data: {}'.format(len(test)))
     print('# vocab: {}'.format(len(vocab)))
     n_class = len(set([int(d[-1]) for d in train]))
     print('# class: {}'.format(n_class))

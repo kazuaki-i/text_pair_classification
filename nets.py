@@ -73,7 +73,7 @@ class TextClassifier(chainer.Chain):
         super(TextClassifier, self).__init__()
         with self.init_scope():
             self.encoder = encoder
-            self.output = L.Linear(encoder.out_units * 2, n_class)
+            self.output = L.Linear(encoder.out_units, n_class)
         self.dropout = dropout
 
     def forward(self, xs1, xs2, ys):
@@ -119,7 +119,7 @@ class LSTMEncoder(chainer.Chain):
                 self.encoder2 = L.NStepLSTM(n_layers, n_units, n_units, dropout)
 
         self.n_layers = n_layers
-        self.out_units = n_units
+        self.out_units = n_units * 2
         self.dropout = dropout
 
     def forward(self, xs1, xs2):
@@ -127,10 +127,7 @@ class LSTMEncoder(chainer.Chain):
         exs2 = sequence_embed(self.embed, xs2, self.dropout)
 
         last_h1, last_c1, ys1 = self.encoder1(None, None, exs1)
-        assert(last_h1.shape == (self.n_layers, len(xs1), self.out_units))
-
         last_h2, last_c2, ys2 = self.encoder2(None, None, exs2)
-        assert(last_h2.shape == (self.n_layers, len(xs2), self.out_units))
 
         concat_outputs = F.concat((last_h1[-1], last_h2[-1]), axis=1)
 
@@ -184,7 +181,7 @@ class CNNEncoder(chainer.Chain):
                     nobias=True)
                 self.mlp2 = MLP(n_layers, out_units * 3, dropout)
 
-        self.out_units = out_units * 3
+        self.out_units = out_units * 3 * 2
         self.dropout = dropout
 
     def forward(self, xs1, xs2):
@@ -222,7 +219,6 @@ class MLP(chainer.ChainList):
         for i in range(n_layers):
             self.add_link(L.Linear(None, n_units))
         self.dropout = dropout
-        self.out_units = n_units
 
     def forward(self, x):
         for i, link in enumerate(self.children()):
@@ -246,7 +242,6 @@ class BOWEncoder(chainer.Chain):
         with self.init_scope():
             self.embed = L.EmbedID(n_vocab, n_units, ignore_label=-1, initialW=embed_init)
 
-        self.out_units = n_units
         self.dropout = dropout
 
     def forward(self, xs):
@@ -281,7 +276,7 @@ class BOWMLPEncoder(chainer.Chain):
                 self.encoder2 = BOWEncoder(n_vocab, n_units, dropout)
                 self.mlp_encoder2 = MLP(n_layers, n_units, dropout)
 
-        self.out_units = n_units
+        self.out_units = n_units * 2
 
     def forward(self, xs1, xs2):
         g, h = self.encoder1(xs1), self.encoder2(xs2)
@@ -312,7 +307,7 @@ class GRUEncoder(chainer.Chain):
                 self.encoder2 = L.NStepGRU(n_layers, n_units, n_units, dropout)
 
         self.n_layers = n_layers
-        self.out_units = n_units
+        self.out_units = n_units * 2
         self.dropout = dropout
 
     def forward(self, xs1, xs2):
@@ -321,10 +316,7 @@ class GRUEncoder(chainer.Chain):
         exs2 = sequence_embed(self.embed, xs2, self.dropout)
 
         last_h1, ys1 = self.encoder1(None, exs1)
-        assert(last_h1.shape == (self.n_layers, len(xs1), self.out_units))
-
         last_h2, ys2 = self.encoder2(None, exs2)
-        assert(last_h2.shape == (self.n_layers, len(xs2), self.out_units))
 
         concat_outputs = F.concat((last_h1[-1], last_h2[-1]), axis=1)
 
